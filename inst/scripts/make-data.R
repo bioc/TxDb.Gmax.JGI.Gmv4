@@ -5,22 +5,36 @@
 ### Build the TxDb SQLite database for Glycine max (Wm82.a4.v1) from the
 ### official JGI/Phytozome GFF3 annotation and its matching reference FASTA.
 ###
-### Source dataset:
+### Source dataset (Phytozome V13, JGI Grouping ID: Phytozome-508):
 ### https://data.jgi.doe.gov/refine-download/phytozome?expanded=Phytozome-508&genome_id=508
 ###
-### Download the following files from the JGI portal and place them in the
-### working directory before running this script:
+### Input files downloaded from the JGI Data Portal on 2026-08-08:
 ###   - Gmax_508_Wm82.a4.v1.gene.gff3.gz
+###       JGI file_id: 5bfc64e746d1e61e989e5766
+###       Size:        11,346,155 bytes
+###       MD5:         e89cae68470e0c73687b6974bb14eac1
 ###   - Gmax_508_v4.0.fa.gz
+###       JGI file_id: 5bfc65db46d1e61e989e5774
+###       Size:        282,364,800 bytes
+###       MD5:         18b563bb32e12bfc9513f46ddaac6092
 ###
-### The regenerated SQLite database is deposited at Zenodo record 23882021:
-### https://zenodo.org/records/23882021
-### Its file path is recorded in inst/extdata/metadata.csv. The corresponding
-### AnnotationHub resource ID must be updated after the new metadata entry has
-### been registered by AnnotationHub.
+### Generated SQLite database (built 2026-11-02 with txdbmaker 1.9.0):
+###   - TxDb.Gmax.JGI.Gmv4.sqlite
+###       Size:        96,006,144 bytes
+###       MD5:         048e15bb8cbad601c7551b0f97b21a17
+###       Zenodo URL:  https://zenodo.org/records/23882021
+###       AnnotationHub ID: AH122288 (rdatapath: records/23882021/files/TxDb.Gmax.JGI.Gmv4.sqlite)
 ###
-### This script is retained for provenance/reproducibility and is not run
-### during package installation or R CMD check.
+### Expected feature counts printed by this script:
+###   - Reference sequences: 282 (genome = "Wm82.a4.v1", 0 NA seqlengths)
+###   - Genes:               52,872
+###   - Transcripts:         86,256
+###   - Exons:               516,059
+###   - CDS features:        516,059
+###
+### Place both JGI source files in the working directory before running this
+### script. This script is retained for provenance/reproducibility and is not
+### run during package installation or R CMD check.
 ###
 
 suppressPackageStartupMessages({

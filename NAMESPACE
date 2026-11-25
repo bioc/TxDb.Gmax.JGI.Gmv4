@@ -1,2 +1,3 @@
-import(AnnotationDbi)
-import(GenomicFeatures)
+# No R functions are exported by this AnnotationHub-backed TxDb package.
+# Required user-facing packages (AnnotationHub, GenomicFeatures, AnnotationDbi)
+# are attached via Depends in DESCRIPTION.

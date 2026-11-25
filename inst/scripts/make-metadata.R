@@ -7,15 +7,12 @@
 ###
 ###   AnnotationHubData::makeAnnotationHubMetadata("<path to package>")
 ###
-### The RDataPath below refers to the currently registered Zenodo record.
-### If a rebuilt SQLite file is deposited under a new Zenodo record, update
-### RDataPath (and confirm the new AnnotationHub resource ID) accordingly.
+### The SourceUrl, Location_Prefix, and RDataPath below point to the
+### Zenodo record (23882021) hosting the SQLite resource derived from the
+### JGI/Phytozome V13 Glycine max Wm82.a4.v1 annotation (Phytozome-508).
 ###
 
-jgi_portal <- paste0(
-    "https://data.jgi.doe.gov/refine-download/phytozome",
-    "?expanded=Phytozome-508&genome_id=508"
-)
+zenodo_record_url <- "https://zenodo.org/records/23882021"
 
 meta <- data.frame(
     Title = "TxDb.Gmax.JGI.Gmv4 JGI/Phytozome Wm82.a4.v1",
@@ -27,7 +24,7 @@ meta <- data.frame(
     Genome = "Wm82.a4.v1",
     SourceType = "GFF",
     SourceVersion = "Wm82.a4.v1",
-    SourceUrl = jgi_portal,
+    SourceUrl = zenodo_record_url,
     Species = "Glycine max",
     TaxonomyId = "3847",
     Coordinate_1_based = TRUE,

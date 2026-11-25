@@ -4,7 +4,9 @@
 ^\.gitignore$
 ^\.Rhistory$
 ^\.RData$
+^\.RDataTmp$
 ^README\.Rmd$
 ^\.github$
 ^doc$
 ^Meta$
+^help$

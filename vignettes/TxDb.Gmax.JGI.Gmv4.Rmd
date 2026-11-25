@@ -10,14 +10,17 @@ vignette: >
 
 # Introduction
 
-`TxDb.Gmax.JGI.Gmv4` provides transcript, exon, CDS, and gene annotations
-for soybean (*Glycine max*, Wm82.a4.v1). The database was generated from the
-official JGI/Phytozome gene GFF3 annotation using the matching Wm82.a4.v1
-reference genome assembly.
+`TxDb.Gmax.JGI.Gmv4` provides transcript, exon, coding sequence (CDS), and
+gene annotations for soybean (*Glycine max* cv. Williams 82, assembly
+`Wm82.a4.v1`). The SQLite `TxDb` database was built from the official
+JGI/Phytozome V13 gene GFF3 annotation together with the matching `Wm82.a4.v1`
+reference FASTA sequence dictionary (`282` sequences) and is distributed via
+Bioconductor's `AnnotationHub`.
 
-This vignette demonstrates how to retrieve the transcript database from
-`AnnotationHub` and access genes, transcripts, exons, coding sequences,
-promoter regions, and feature relationships.
+This vignette demonstrates how to discover and retrieve the `TxDb` object via
+`AnnotationHub`, inspect its database provenance and sequence metadata, access
+core gene-model features, and annotate a `GRanges` object of candidate genomic
+loci and SNPs.
 
 # Installation
 
@@ -32,128 +35,179 @@ BiocManager::install("TxDb.Gmax.JGI.Gmv4")
 
 # Load required packages
 
+Loading `TxDb.Gmax.JGI.Gmv4` automatically attaches `AnnotationHub`,
+`GenomicFeatures`, and `AnnotationDbi`. We additionally load `GenomicRanges`,
+`IRanges`, `GenomeInfoDb`, and `S4Vectors` for the worked overlap example
+below.
+
 ```{r loading, message=FALSE, warning=FALSE}
-library(AnnotationHub)
-library(GenomicFeatures)
+library(TxDb.Gmax.JGI.Gmv4)
 library(GenomicRanges)
+library(IRanges)
 library(GenomeInfoDb)
+library(S4Vectors)
 ```
 
 # Retrieve the TxDb object from AnnotationHub
 
-The TxDb object is retrieved using its AnnotationHub record:
+Rather than hard-coding an `AnnotationHub` identifier, query `AnnotationHub`
+by package and assembly name so code remains reproducible even if the record
+ID is updated in future snapshots:
 
 ```{r annotationhub, message=FALSE, warning=FALSE}
-ah <- AnnotationHub::AnnotationHub()
-TxDb.Gmax.JGI.Gmv4 <- ah[["AH122288"]]
+ah <- AnnotationHub()
+q <- query(ah, c("TxDb.Gmax.JGI.Gmv4", "Wm82.a4.v1"))
+q
+txdb <- q[[1]]
 ```
 
-Check the class of the retrieved object:
+Check the class and summary of the retrieved object:
 
-```{r class}
-class(TxDb.Gmax.JGI.Gmv4)
+```{r class-summary}
+class(txdb)
+summary(txdb)
 ```
 
-# TxDb summary
+# Database provenance and metadata
 
-Display the transcript database:
+Display the database overview and its internal `metadata()` table (recording
+the data source, organism, taxonomy ID, assembly, build date, and `txdbmaker`
+version):
 
-```{r txdb}
-TxDb.Gmax.JGI.Gmv4
+```{r provenance}
+txdb
+S4Vectors::metadata(txdb)
 ```
 
-A summary can also be obtained with:
+For full reproducibility, the underlying JGI/Phytozome V13 (`Phytozome-508`)
+input files were downloaded from the JGI Data Portal on **2026-08-08**, and
+the SQLite `TxDb` was generated on **2026-11-02** (`inst/scripts/make-data.R`)
+and archived at [Zenodo record 23882021](https://zenodo.org/records/23882021):
 
-```{r summary}
-summary(TxDb.Gmax.JGI.Gmv4)
-```
+- **`Gmax_508_Wm82.a4.v1.gene.gff3.gz`** (JGI file ID
+    `5bfc64e746d1e61e989e5766`, `11,346,155` bytes, MD5
+    `e89cae68470e0c73687b6974bb14eac1`): JGI/Phytozome GFF3 gene annotation.
+- **`Gmax_508_v4.0.fa.gz`** (JGI file ID `5bfc65db46d1e61e989e5774`,
+    `282,364,800` bytes, MD5 `18b563bb32e12bfc9513f46ddaac6092`): matching
+    `Wm82.a4.v1` reference genome FASTA.
+- **`TxDb.Gmax.JGI.Gmv4.sqlite`** (`96,006,144` bytes, MD5
+    `048e15bb8cbad601c7551b0f97b21a17`): generated `TxDb` SQLite database.
+
+The database contains **282** reference sequences (`Wm82.a4.v1`), **52,872**
+genes, **86,256** transcripts, **516,059** exons, and **516,059** CDS
+features.
 
 # Sequence information
 
-The sequence information is available through `seqinfo()`:
+Inspect the complete sequence dictionary derived from `Gmax_508_v4.0.fa.gz`:
 
 ```{r seqinfo}
-seqinfo(TxDb.Gmax.JGI.Gmv4)
+seqinfo(txdb)
+head(seqlevels(txdb))
 ```
 
-The available sequence levels can be obtained with:
+# Core gene-model accessors
 
-```{r seqlevels}
-head(seqlevels(TxDb.Gmax.JGI.Gmv4))
-```
+Extract gene, transcript, exon, CDS, and promoter ranges:
 
-# Gene annotations
+```{r accessors}
+gene_gr <- genes(txdb)
+tx_gr <- transcripts(txdb)
+exon_gr <- exons(txdb)
+cds_gr <- cds(txdb)
+promoter_gr <- promoters(txdb, upstream = 2000, downstream = 200)
 
-Gene ranges can be extracted with `genes()`:
-
-```{r genes}
-gene_annotations <- genes(TxDb.Gmax.JGI.Gmv4)
-gene_annotations
-```
-
-# Transcript annotations
-
-Transcript ranges can be extracted with `transcripts()`:
-
-```{r transcripts}
-transcript_annotations <- transcripts(TxDb.Gmax.JGI.Gmv4)
-head(transcript_annotations)
-```
-
-# Exon annotations
-
-Exon ranges can be extracted with `exons()`:
-
-```{r exons}
-exon_annotations <- exons(TxDb.Gmax.JGI.Gmv4)
-head(exon_annotations)
-```
-
-# Coding sequences (CDS)
-
-Coding sequence ranges can be extracted with `cds()`:
-
-```{r cds}
-cds_annotations <- cds(TxDb.Gmax.JGI.Gmv4)
-head(cds_annotations)
-```
-
-# Promoter regions
-
-Promoter regions can be generated using `promoters()`:
-
-```{r promoters}
-promoter_annotations <- promoters(
-    TxDb.Gmax.JGI.Gmv4,
-    upstream = 2000,
-    downstream = 200
+c(
+    genes = length(gene_gr),
+    transcripts = length(tx_gr),
+    exons = length(exon_gr),
+    cds = length(cds_gr)
 )
-head(promoter_annotations)
+head(gene_gr)
 ```
 
-# Transcripts grouped by gene
+Group transcripts by gene and exons by transcript:
 
-Transcripts can be grouped by gene with `transcriptsBy()`:
+```{r grouped-accessors}
+transcripts_by_gene <- transcriptsBy(txdb, by = "gene")
+exons_by_transcript <- exonsBy(txdb, by = "tx")
+head(transcripts_by_gene, 3)
+head(exons_by_transcript, 3)
+```
 
-```{r transcriptsBy}
-transcripts_by_gene <- transcriptsBy(
-    TxDb.Gmax.JGI.Gmv4,
-    by = "gene"
+# Worked example: annotating candidate genomic loci and SNPs
+
+In downstream genomics analyses (such as GWAS fine-mapping, QTL annotation, or
+ATAC-seq peak assignment), a common workflow is intersecting a `GRanges` of
+candidate regions or SNPs against gene bodies and upstream promoter regions:
+
+```{r worked-example}
+candidate_loci <- GRanges(
+    seqnames = c("Gm01", "Gm01", "Gm02", "Gm02"),
+    ranges = IRanges(
+        start = c(27800L, 58000L, 1800L, 20500L),
+        end = c(27800L, 61000L, 1800L, 20500L)
+    ),
+    locus_id = c("SNP_Gm01_1", "Peak_Gm01_2", "SNP_Gm02_3", "SNP_Gm02_4")
 )
-transcripts_by_gene
-```
 
-# Exons grouped by transcript
-
-Exons can be grouped by transcript with `exonsBy()`:
-
-```{r exonsBy}
-exons_by_transcript <- exonsBy(
-    TxDb.Gmax.JGI.Gmv4,
-    by = "tx"
+# Overlap candidate loci with gene bodies
+gene_hits <- findOverlaps(candidate_loci, gene_gr, ignore.strand = TRUE)
+gene_overlap_tbl <- data.frame(
+    locus_id = candidate_loci$locus_id[queryHits(gene_hits)],
+    locus_chr = as.character(seqnames(candidate_loci)[queryHits(gene_hits)]),
+    locus_pos = start(candidate_loci)[queryHits(gene_hits)],
+    overlapping_gene = gene_gr$gene_id[subjectHits(gene_hits)],
+    gene_strand = as.character(strand(gene_gr)[subjectHits(gene_hits)]),
+    stringsAsFactors = FALSE
 )
-exons_by_transcript
+gene_overlap_tbl
+
+# Overlap candidate loci with 2 kb upstream promoter regions
+prom_hits <- findOverlaps(candidate_loci, promoter_gr, ignore.strand = TRUE)
+prom_overlap_tbl <- data.frame(
+    locus_id = candidate_loci$locus_id[queryHits(prom_hits)],
+    promoter_tx = promoter_gr$tx_name[subjectHits(prom_hits)],
+    tx_strand = as.character(strand(promoter_gr)[subjectHits(prom_hits)]),
+    stringsAsFactors = FALSE
+)
+prom_overlap_tbl
 ```
+
+# Data license, terms of use, and citation
+
+## License and redistribution terms
+
+- **Package code and documentation:** Licensed under `Artistic-2.0`.
+- **Underlying genome assembly and annotation data:** The *Glycine max*
+    `Wm82.a4.v1` assembly and gene annotation are published, publicly released
+    datasets distributed by the U.S. Department of Energy Joint Genome Institute
+    (DOE JGI) through Phytozome V13 (`Phytozome-508`) under the JGI Data
+    Utilization Policy (<https://jgi.doe.gov/data-policy/>). Because
+    `Wm82.a4.v1` is a mature, published public reference release with no active
+    embargo, academic use and redistribution of the derived `TxDb` SQLite
+    database via Zenodo and Bioconductor's `AnnotationHub` are permitted with
+    proper source attribution.
+
+## Citations
+
+Users of this annotation resource should cite both the *Glycine max* genome
+publications and the Phytozome platform:
+
+- **Wm82.a4.v1 genome assembly:** Valliyodan, B., Cannon, S. B., Bayer, P. E.,
+    Shu, S., Brown, A. V., Ren, L., Jenkins, J., Chung, C. Y.-L., Chan, T.-F.,
+    Daum, C. G., et al. (2019). Construction and comparison of three
+    reference-quality genome assemblies for soybean. *The Plant Journal*,
+    100(5), 1066–1082. <https://doi.org/10.1111/tpj.14500>
+- **Williams 82 reference genome:** Schmutz, J., Cannon, S. B., Schlueter, J.,
+    Ma, J., Mitros, T., Nelson, W., Hyten, D. L., Song, Q., Thelen, J. J.,
+    Cheng, J., et al. (2010). Genome sequence of the palaeopolyploid soybean.
+    *Nature*, 463(7278), 178–183. <https://doi.org/10.1038/nature08670>
+- **Phytozome portal:** Goodstein, D. M., Shu, S., Howson, R., Neupane, R.,
+    Hayes, B., Fazo, J., Mitros, T., Dirks, W., Hellsten, U., Putnam, N., &
+    Rokhsar, D. S. (2012). Phytozome: a comparative platform for green plant
+    genomics. *Nucleic Acids Research*, 40(D1), D1178–D1186.
+    <https://doi.org/10.1093/nar/gkr944>
 
 # Session information
 

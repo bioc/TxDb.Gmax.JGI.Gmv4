@@ -1,6 +1,6 @@
 Package: TxDb.Gmax.JGI.Gmv4
 Title: Transcript Annotation Database for Soybean
-Version: 0.99.2
+Version: 0.99.3
 Authors@R:
     c(
       person("Dwijesh Chandra", "Mishra",
@@ -23,8 +23,7 @@ Description:
     models using GenomicFeatures accessors such as genes(), transcripts(),
     exonsBy(), and cdsBy().
 Depends:
-    R (>= 4.6.0)
-Imports:
+    R (>= 4.6.0),
     AnnotationHub,
     GenomicFeatures,
     AnnotationDbi
@@ -34,6 +33,8 @@ Suggests:
     Biostrings,
     GenomeInfoDb,
     GenomicRanges,
+    IRanges,
+    S4Vectors,
     knitr,
     rmarkdown,
     testthat (>= 3.0.0),
